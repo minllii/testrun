@@ -12,7 +12,7 @@ app.listen(port, () => {
    console.log(`Example app listening on port ${port}`)
 })
 
-//can manually add objectId here
+//manually add objectId here bcs for delete we put the id
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://minllii:minli0327@cluster0.zl6og2w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -53,7 +53,7 @@ async function run() {
     // {
     //   $set: {
     //     description: 'Data Science',
-    //     Semester: 3
+    //     Semester: 2
     //   }
     // })
 
