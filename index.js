@@ -12,8 +12,8 @@ app.listen(port, () => {
    console.log(`Example app listening on port ${port}`)
 })
 
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
+//can manually add objectId here
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://minllii:minli0327@cluster0.zl6og2w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -32,9 +32,40 @@ async function run() {
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    // let result = await client.db('testrun').collection('test123').insertOne(
+    //   {
+    //     total: 19.4,
+    //     Name: "NEW",
+    //     phone: "0927491830"
+    //   }
+    //   )
+    // console.log(result)
+
+    // let total = await client.db('testrun').collection('test123').find(
+    // {
+    //   total: 18.8
+    // }).toArray()
+    // console.log(total)
+
+    // let updated = await client.db('testrun').collection('test123').updateOne(
+    // { total: 20},
+    // {
+    //   $set: {
+    //     description: 'Data Science',
+    //     Semester: 3
+    //   }
+    // })
+
+    // let deleted = await client.db('testrun').collection('test123').deleteOne(
+    //   {
+    //     _id: new ObjectId ('660b6c1c70a8150cab5a2df3')
+    //   }
+    // )
+
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+  
   }
 }
 run().catch(console.dir);
