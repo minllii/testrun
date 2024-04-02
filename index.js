@@ -5,8 +5,20 @@ const port = process.env.PORT || 3000;
 app.use(express.json())
 
 app.get('/', (req, res) => {
-   res.send('Hello World!!')
+   res.send('hello world!')
 })
+
+// testing//
+// app.get('/', (req, res) => {
+//   let total = await client.db('testrun').collection('test123').find().toArray()
+//   res.send(test123)
+// })
+
+// when these two are typed,get is taken bcs we are only typing the url- hello world is displayed
+// app.post('/', (req, res) => {
+//   res.send('bye world!')
+//   res.statusCode(300).send('hello')  //this line can define the status code
+// })
 
 app.listen(port, () => {
    console.log(`Example app listening on port ${port}`)
@@ -65,8 +77,9 @@ async function run() {
 
   } finally {
     // Ensures that the client will close when you finish/error
+    // await client.close();
   
   }
 }
 run().catch(console.dir);
-
+ 
