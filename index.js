@@ -7,12 +7,19 @@ app.use(express.json())
 
 //new user registration
 app.post('/user', async (req, res) => {
+  //check if username already exist
+  let existing = await client.db("testrun").collection("test123").findOne({
+    username: req.body.username
+  })
+  if(existing){
+    res.status(400).send("username already exist")
+  }
+  else{
   //insertOne the registration data to mongo
   const hash = bcrypt.hashSync(req.body.password, 10); //hash pwd, 10 rounds
   //console.log(req.body.username)
   let result = await client.db("testrun").collection("test123").insertOne(
   {
-    //it can be "user:"(or any another name)- no need same like '.username'
     username: req.body.username,
     password: hash, //instead of password: req.body.password, -- bcs want to hash pwd
     name: req.body.name,
@@ -20,7 +27,35 @@ app.post('/user', async (req, res) => {
   }
 )
 res.send(result)
+}
 })
+
+//user login api
+app.post('/login', async (req, res) => {
+  // step #1: res.body.username? -need to check if username is in database-find
+  let result = await client.db("testrun").collection("test123").findOne({
+      //req.body.username is username submitted by user, 'username' is the document in data
+      username: req.body.username 
+  })
+
+  if (result) {
+    // step #2: if user exist, check if password is correct
+    if (bcrypt.compareSync(req.body.password, result.password) == true) {
+      // password is correct
+      res.send("Welcome back " + result.name)
+    } else {
+      // password is incorrect
+      res.status(401).send('wrong password')
+    }
+
+  } else {
+    // step #3: if user not found
+    res.status(401).send("username is not found")
+  }
+})
+  
+
+
 app.get('/', (req, res) => {
    res.send('hello world!')
 })
