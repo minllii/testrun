@@ -1,9 +1,26 @@
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
+const bcrypt = require('bcrypt');
 
 app.use(express.json())
 
+//new user registration
+app.post('/user', async (req, res) => {
+  //insertOne the registration data to mongo
+  const hash = bcrypt.hashSync(req.body.password, 10); //hash pwd, 10 rounds
+  //console.log(req.body.username)
+  let result = await client.db("testrun").collection("test123").insertOne(
+  {
+    //it can be "user:"(or any another name)- no need same like '.username'
+    username: req.body.username,
+    password: hash, //instead of password: req.body.password, -- bcs want to hash pwd
+    name: req.body.name,
+    email: req.body.email
+  }
+)
+res.send(result)
+})
 app.get('/', (req, res) => {
    res.send('hello world!')
 })
@@ -12,7 +29,7 @@ app.get('/', (req, res) => {
 // app.get('/', (req, res) => {
 //   let total = await client.db('testrun').collection('test123').find().toArray()
 //   res.send(test123)
-// })
+//  })
 
 // when these two are typed,get is taken bcs we are only typing the url- hello world is displayed
 // app.post('/', (req, res) => {
