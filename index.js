@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 app.use(express.json())
 
@@ -57,7 +57,7 @@ app.post('/login', async (req, res) => {
       var token = jwt.sign(
         { _id: result._id, username: result.username, name: result.name}, 
         'thisisthepasskey',
-        {expiresIn: 60}
+        {expiresIn: 120}
       );
       res.send(token)
     } else {
@@ -75,19 +75,41 @@ app.post('/login', async (req, res) => {
 })
   
 // get user profile
-app.get('/user/:_id', async (req, res) => {
-  console.log(req.headers.authorization.split(' '))
-  // findOne
-  let result = await client.db("testrun").collection("test123").findOne({
-    _id: new ObjectId(req.params.id)
-  })
-  res.send(result)
+app.get('/user/:id', verifyToken, async (req, res) => {
+  let auth = req.headers.authorization
+  let authSplitted = auth.split(' ')
+  let token = authSplitted[1]
+  let decoded = jwt.verify(token, 'thisisthepasskey')
+  console.log(decoded)
+   //console.log(req.headers.authorization.split(' '))
+
+  if (decoded._id != req.params.id) {
+    res.status(401).send('Unauthorized Access')
+  }else {
+    let result = await client.db("testrun").collection("test123").findOne({
+      _id: new ObjectId(req.params.id)
+    })
+    res.send(result)
+  }
 })
 
 // update user account
-app.patch('/user', (req, res) => {
-  // updateOne
-  console.log('update user profile')
+app.patch('/user/:id', verifyToken, async (req, res) => {
+  if (req.identify._id != req.params.id) {
+    res.send('Unauthorized')
+  }else {
+    let result = await client.db("testrun").collection("test123").updateOne(
+      {
+        _id: new ObjectId(req.params.id)
+      },
+      {
+        $set: {
+          name: req.body.name
+        }
+      }
+    )
+    res.send(result)
+  }
 })
 
 // delete user account
@@ -124,6 +146,23 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+async function verifyToken(req, res, next){
+  const authHeader = re1.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+
+  if (token == null) return res.sendStatus(401)
+
+  jwt.verify(token, "thisisthepaskey", (err, decoded) => {
+    console.log(err)
+
+    if (err) return res.sendStatus(403)
+
+    req.identify = decoded
+
+    next()
+  })
+}
 
 async function run() {
   try {
