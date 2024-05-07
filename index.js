@@ -2,8 +2,19 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
 
 app.use(express.json())
+
+app.get('/inc', async (req, res) => {
+  let result = await client.db("foodsample").collection("fooddetail").updateOne(
+    {name: {$eq:"Nasi Lemak"} },
+    {
+      $inc: {price: 3}
+    },
+    res.send(result)
+  )
+})
 
 //new user registration
 app.post('/user', async (req, res) => {
@@ -32,6 +43,7 @@ res.send(result)
 
 //user login api
 app.post('/login', async (req, res) => {
+  if (req.body.username != null && req.body.password != null) {
   // step #1: res.body.username? -need to check if username is in database-find
   let result = await client.db("testrun").collection("test123").findOne({
       //req.body.username is username submitted by user, 'username' is the document in data
@@ -42,7 +54,12 @@ app.post('/login', async (req, res) => {
     // step #2: if user exist, check if password is correct
     if (bcrypt.compareSync(req.body.password, result.password) == true) {
       // password is correct
-      res.send("Welcome back " + result.name)
+      var token = jwt.sign(
+        { _id: result._id, username: result.username, name: result.name}, 
+        'thisisthepasskey',
+        {expiresIn: 60}
+      );
+      res.send(token)
     } else {
       // password is incorrect
       res.status(401).send('wrong password')
@@ -52,12 +69,31 @@ app.post('/login', async (req, res) => {
     // step #3: if user not found
     res.status(401).send("username is not found")
   }
+  } else {
+    req.status(400).send("missing username or password")
+  }
 })
   
+// get user profile
+app.get('/user/:_id', async (req, res) => {
+  console.log(req.headers.authorization.split(' '))
+  // findOne
+  let result = await client.db("testrun").collection("test123").findOne({
+    _id: new ObjectId(req.params.id)
+  })
+  res.send(result)
+})
 
+// update user account
+app.patch('/user', (req, res) => {
+  // updateOne
+  console.log('update user profile')
+})
 
-app.get('/', (req, res) => {
-   res.send('hello world!')
+// delete user account
+app.delete('/user', (req, res) => {
+  // deleteOne
+  console.log('delete user account')
 })
 
 // testing//
